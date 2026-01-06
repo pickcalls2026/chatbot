@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Auto Coverage Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+body{
+    background:#7FE3D6;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+.chat-box{
+    max-width:720px;
+    height:80vh;
+    margin:40px auto;
+    background:#fff;
+    border-radius:10px;
+    padding:25px;
+    overflow-y:auto;
+}
+.message{
+    display:flex;
+    margin-bottom:14px;
+}
+.agent{align-items:flex-start}
+.user{justify-content:flex-end}
+
+.bubble{
+    max-width:75%;
+    padding:12px 16px;
+    border-radius:14px;
+    font-size:15px;
+}
+.agent .bubble{
+    background:#f1f3f5;
+    margin-left:10px;
+}
+.user .bubble{
+    background:#0d6efd;
+    color:#fff;
+    margin-right:10px;
+}
+
+.avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+}
+
+.chat-animate{
+    animation:slideUpFade .35s ease forwards;
+}
+@keyframes slideUpFade{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+/* typing */
+.typing span{
+    width:7px;height:7px;
+    background:#aaa;
+    border-radius:50%;
+    display:inline-block;
+    animation:blink 1.4s infinite both;
+}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{
+    0%{opacity:.2}20%{opacity:1}100%{opacity:.2}
+}
+
+.highlight {
+    background: #fff176;
+    padding: 2px 8px;
+    transform: rotate(-2deg);
+    display: inline-block;
+}
+
+.agent-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 5px solid #20c997;
+    object-fit: cover;
+}
+
+</style>
+</head>
+
+<body>
+
+  <header class="bg-white shadow-sm">
+    <div class="container py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <img src="img/logo.jpeg" height="50" alt="Logo">
+           
+        </div>
+        <a href="#" class="btn btn-success fw-bold px-4">
+            FREE QUOTE →
+        </a>
+    </div>
+</header>
+
+<!-- ===== HERO SECTION ===== -->
+<section class="bg-white text-center py-5">
+    <div class="container">
+
+        <h1 class="fw-bold display-6">
+            LOWER YOUR INSURANCE COSTS.<br>
+            GET A FREE QUOTE IN
+            <span class="highlight">2 MINUTES!</span>
+        </h1>
+
+        <div class="my-4">
+            <img src="img/jenkins.jpg" class="agent-img" alt="Agent">
+        </div>
+
+        <h6 class="text-success fw-bold">
+            LET'S GET STARTED
+        </h6>
+
+    </div>
+</section>
+
+<section id="chat-section">
+    <div class="chat-box" id="chat"></div>
+</section>
+
+<script>
+const chat = $("#chat");
+const chatSection = $("#chat-section");
+let pageScrolled = false;
+let step = "start"; // CHAT STATE
+
+/* =========================
+   AUTO SCROLL
+========================= */
+function autoScroll() {
+    chat.stop().animate({
+        scrollTop: chat[0].scrollHeight
+    }, 400);
+
+    if (!pageScrolled) {
+        $("html, body").animate({
+            scrollTop: chatSection.offset().top - 20
+        }, 700);
+        pageScrolled = true;
+    }
+}
+
+/* =========================
+   TYPING
+========================= */
+function typing() {
+    chat.append(`
+        <div class="message agent typing-msg">
+            <img src="img/jenkins.jpg" class="avatar">
+            <div class="bubble">
+                <div class="typing"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+    `);
+    autoScroll();
+}
+
+function stopTyping() {
+    $(".typing-msg").remove();
+}
+
+/* =========================
+   MESSAGES
+========================= */
+function agent(text) {
+    typing();
+    setTimeout(() => {
+        stopTyping();
+        chat.append(`
+            <div class="message agent">
+                <img src="img/jenkins.jpg" class="avatar">
+                <div class="bubble">${text}</div>
+            </div>
+        `);
+        autoScroll();
+    }, 800);
+}
+
+function user(text) {
+    chat.append(`
+        <div class="message user">
+            <div class="bubble">${text}</div>
+            <img src="img/profile.jpg" class="avatar">
+        </div>
+    `);
+    autoScroll();
+}
+
+/* =========================
+   OPTIONS
+========================= */
+function options(arr) {
+    let html = '';
+    arr.forEach(v => {
+        html += `<button class="btn btn-primary btn-sm m-1 opt">${v}</button>`;
+    });
+
+    chat.append(`<div class="text-center options-wrap">${html}</div>`);
+    autoScroll();
+}
+
+/* =========================
+   FINAL STATES
+========================= */
+function notQualified() {
+    agent("❌ You aren't qualified for a cheaper auto insurance policy at the moment.<br>Please come back later.");
+}
+
+function qualified() {
+    agent("🎉 You're pre-qualified to save $600+ on your car insurance 🙌");
+    setTimeout(() => {
+        chat.append(`
+            <div class="text-center mt-2">
+                <a href="tel:+18887564778" class="btn btn-success btn-lg">
+                    📞 Call +1 (888) 756-4778
+                </a>
+            </div>
+        `);
+        autoScroll();
+    }, 1000);
+}
+
+/* =========================
+   START CHAT
+========================= */
+setTimeout(() => agent("Hello 👋 I'm Maria from the Auto Coverage Program"), 500);
+setTimeout(() => agent("Want to know if you can get cheaper Auto Insurance for your car?"), 2200);
+setTimeout(() => {
+    step = "intro";
+    options(["Yeah"]);
+}, 4200);
+
+/* =========================
+   CLICK HANDLER (STATE BASED)
+========================= */
+$(document).on("click", ".opt", function () {
+
+    const value = $(this).text();
+    $(".options-wrap").remove();
+    user(value);
+
+    /* STEP: INTRO */
+    if (step === "intro") {
+        step = "vehicle";
+        setTimeout(() => agent("Do you own a vehicle?"), 800);
+        setTimeout(() => options(["Yes", "No"]), 2000);
+    }
+
+    /* STEP: VEHICLE */
+    else if (step === "vehicle") {
+        if (value === "No") {
+            step = "end";
+            setTimeout(notQualified, 800);
+        } else {
+            step = "insured";
+            setTimeout(() => agent("Are you currently insured?"), 800);
+            setTimeout(() => options(["Yes", "No"]), 2000);
+        }
+    }
+
+    /* STEP: INSURED */
+    else if (step === "insured") {
+        step = "end";
+        if (value === "Yes") {
+            setTimeout(notQualified, 800);
+        } else {
+            setTimeout(qualified, 800);
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>
